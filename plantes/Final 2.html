@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Camille vs. La Jungle – Le Quiz qui fait pousser le cerveau 🌿🧠</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827cc; --text:#e5e7eb; --muted:#9ca3af; --ok:#22c55e; --no:#ef4444; --info:#3b82f6; }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 800px at 10% -20%,#1f2937,#0f172a);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+    .container{max-width:1000px;margin:24px auto;padding:16px}
+    .card{background:var(--card);backdrop-filter:blur(6px);border:1px solid #1f2937;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    h1{font-size:20px;margin:0;color:#f3f4f6}
+    .pill{font-size:12px;color:var(--muted);background:#0b1220;border:1px solid #1f2937;padding:6px 10px;border-radius:999px}
+    .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:780px){.grid{grid-template-columns:1.2fr 1fr}}
+    .image-wrap{position:relative;border-radius:16px;overflow:hidden;background:#0b1220;border:1px solid #1f2937;min-height:320px;display:flex;align-items:center;justify-content:center}
+    .image-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+    .image-caption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.7));padding:12px 14px;font-size:13px;color:#d1d5db}
+    .field{display:flex;flex-direction:column;gap:6px}
+    label{font-size:13px;color:#cbd5e1}
+    input{padding:12px 14px;border-radius:12px;border:1px solid #334155;background:#0b1220;color:var(--text)}
+    input:focus{outline:none;border-color:#64748b}
+    .row{display:grid;gap:10px}
+    @media(min-width:560px){.row{grid-template-columns:1fr 1fr}}
+    button{cursor:pointer;border:1px solid #334155;background:#0b1220;color:var(--text);padding:10px 14px;border-radius:12px;font-weight:600}
+    button:hover{border-color:#475569}
+    .btn-primary{background:linear-gradient(135deg,#0b1220,#12233f);border-color:#3b82f633}
+    .btn-accent{background:linear-gradient(135deg,#0b1220,#0f2a1a);border-color:#22c55e55}
+    .btn-danger{background:linear-gradient(135deg,#0b1220,#340e11);border-color:#ef444455}
+    .status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;margin-bottom:8px;flex-wrap:wrap}
+    .toast{margin-top:10px;font-weight:700}
+    .toast.ok{color:var(--ok)}
+    .toast.mid{color:var(--info)}
+    .toast.no{color:var(--no)}
+    footer{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .muted{color:var(--muted);font-size:12px}
+    pre{white-space:pre-wrap;background:#0b1220;border:1px solid #1f2937;padding:10px;border-radius:12px;overflow:auto;max-height:260px}
+    .anecdote{font-size:13px;color:#c7d2fe;margin-top:6px}
+    .hidden{display:none}
+    /* Results page */
+    .results{display:none}
+    .results h2{margin-top:0}
+    .media{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .media img{max-width:240px;border-radius:12px;border:1px solid #1f2937}
+    .list{margin-top:8px}
+    .list li{margin:4px 0}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- QUIZ VIEW -->
+    <div id="view-quiz" class="card">
+      <header>
+        <h1>Camille vs. La Jungle – Le Quiz qui fait pousser le cerveau 🌿🧠</h1>
+        <div class="controls">
+          <span class="pill" id="phase">Manche 1 / 2</span>
+          <span class="pill" id="progress">Question 1 / 12</span>
+          <span class="pill" id="score">Score : 0</span>
+          <span class="pill" id="bonus">Bonus temps : 0 s</span>
+          <button id="btn-skip" class="btn-primary" title="Passer la question">Passer ↷</button>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div class="image-wrap">
+          <img id="photo" alt="Photo de la plante" />
+          <div class="image-caption" id="caption">Astuce : observe feuilles, écorce, floraison… (saisie exacte demandée, Camille)</div>
+        </div>
+        <div>
+          <div class="status">
+            <span id="famille" class="pill">Famille : —</span>
+            <span class="pill">Camille, tape exactement majuscules, accents et apostrophes.</span>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="latin">Nom latin (exact)</label>
+              <input id="latin" placeholder="ex : Quercus robur" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="commun">Nom commun (exact)</label>
+              <input id="commun" placeholder="ex : Chêne pédonculé" autocomplete="off" />
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+            <button id="btn-validate" class="btn-accent">Valider</button>
+            <button id="btn-reveal" class="btn-primary">Afficher la réponse</button>
+            <button id="btn-reset" class="btn-danger">Réinitialiser</button>
+            <button id="btn-next" class="btn-primary hidden">Question suivante →</button>
+          </div>
+          <div class="toast" id="toast"></div>
+          <div class="anecdote" id="anec"></div>
+        </div>
+      </div>
+
+      <details class="card" style="margin-top:12px;">
+        <summary><b⚙️ Paramètres & données</b> — clique pour voir / modifier</summary>
+        <p class="muted">Édite la liste des plantes. <b>latin</b> et <b>commun</b> peuvent avoir des alias (séparés par <code>|</code>). <b>image</b> = chemin vers l'image. <b>famille</b> reste affichée pendant la question.</p>
+        <pre id="data-preview"></pre>
+      </details>
+    </div>
+
+    <!-- RESULTS VIEW -->
+    <div id="view-results" class="card results">
+      <h2>Bravo Camille ! Résultats de la session 🌟</h2>
+      <p id="summary"></p>
+      <div class="media">
+        <audio id="applause" controls src="audio/victory.mp3">Votre navigateur ne supporte pas l'audio.</audio>
+        <img id="gif" src="images/victory.gif" alt="Victoire !" />
+      </div>
+      <div class="list-wrap">
+        <h3>À revoir (erreurs au premier essai)</h3>
+        <ul id="wrong-list" class="list"></ul>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+        <button id="btn-replay" class="btn-accent">Rejouer une nouvelle session</button>
+        <button id="btn-back" class="btn-primary">Retour au quiz</button>
+      </div>
+      <p class="muted" style="margin-top:8px">Astuce : place un fichier audio à <code>audio/victory.mp3</code> et un gif à <code>images/victory.gif</code> pour une ambiance encore plus épique 🌈</p>
+    </div>
+  </div>
+
+  <script>
+    // === Données (mets tes images dans /images) ===
+    const PLANTES_MASTER = [
+      { latin: "Carpinus betulus", commun: "Charme commun|Charme", famille: "Betulaceae", image: "images/carpinus_betulus.jpg" },
+      { latin: "Acer palmatum", commun: "Érable du Japon|Erable du Japon", famille: "Aceraceae", image: "images/acer_palmatum.jpg" },
+      { latin: "Acer platanoides", commun: "Érable plane|Erable plane", famille: "Aceraceae", image: "images/acer_platanoides.jpg" },
+      { latin: "Quercus robur", commun: "Chêne pédonculé", famille: "Fagaceae", image: "images/quercus_robur.jpg" },
+      { latin: "Quercus rubra", commun: "Chêne rouge d’Amérique", famille: "Fagaceae", image: "images/quercus_rubra.jpg" },
+      { latin: "Liquidambar styraciflua", commun: "Copalme d’Amérique", famille: "Altingiaceae", image: "images/liquidambar_styraciflua.jpg" },
+      { latin: "Ginkgo biloba", commun: "Ginkgo", famille: "Ginkgoaceae", image: "images/ginkgo_biloba.jpg" },
+      { latin: "Cornus sanguinea", commun: "Cornouiller sanguin", famille: "Cornaceae", image: "images/cornus_sanguinea.jpg" },
+      { latin: "Hamamelis mollis", commun: "Hamamélis de Chine", famille: "Hamamelidaceae", image: "images/hamamelis_mollis.jpg" },
+      { latin: "Magnolia × soulangeana", commun: "Magnolia de Soulange", famille: "Magnoliaceae", image: "images/magnolia_soulangeana.jpg" },
+      { latin: "Acer griseum", commun: "Érable à écorce de papier", famille: "Aceraceae", image: "images/acer_griseum.jpg" },
+      { latin: "Koelreuteria paniculata", commun: "Savonnier", famille: "Sapindaceae", image: "images/koelreuteria_paniculata.jpg" },
+      // tu peux en ajouter d'autres ici
+    ];
+
+    // === Anecdotes étendues ===
+    const ANECDOTES = {
+      "Carpinus betulus": "Son bois très dur servait aux engrenages de moulins — comme Camille, il ne casse pas sous la pression !",
+      "Acer palmatum": "Au Japon, on célèbre sa beauté en automne durant le momijigari, un festival de feuilles flamboyantes.",
+      "Acer platanoides": "On le reconnaît à son latex collant… un peu comme Camille accrochée à ses révisions !",
+      "Quercus robur": "Symbole de force, ce chêne vit plus de 500 ans. Patience et robustesse : deux qualités que Camille partage !",
+      "Quercus rubra": "Son feuillage rouge vif illumine les forêts en automne — comme le sourire de Camille dans une serre.",
+      "Liquidambar styraciflua": "Sa résine parfumée, l’ambre liquide, était jadis utilisée en parfumerie.",
+      "Ginkgo biloba": "Apparu il y a plus de 200 millions d’années, c’est un survivant de la préhistoire — et une star des jardins asiatiques.",
+      "Cornus sanguinea": "Ses rameaux rouges en hiver rappellent que même sans feuilles, la nature reste colorée.",
+      "Hamamelis mollis": "Fleurit au cœur de l’hiver ! Ses fleurs jaunes s’ouvrent dans le froid — comme Camille devant un défi.",
+      "Magnolia × soulangeana": "Hybride horticole créé en France, célèbre pour ses grandes fleurs printanières.",
+      "Acer griseum": "L’écorce s’exfolie en lamelles cannelle : décoratif toute l’année !",
+      "Koelreuteria paniculata": "Surnommé l’arbre aux lanternes chinoises à cause de ses fruits gonflés.",
+      "Fagus sylvatica": "Le hêtre commun peut atteindre 40 m et former des forêts féériques.",
+      "Prunus avium": "Cerisier des oiseaux : ses fruits rouges attirent la faune.",
+      "Tilia platyphyllos": "Floraison embaumante en juin — un parfum apaisant comme une balade avec Camille.",
+      "Gleditsia triacanthos": "De longues épines protègent un arbre très élégant.",
+      "Cercis siliquastrum": "Appelé arbre de Judée : ses fleurs roses apparaissent avant les feuilles !",
+      "Melia azedarach": "Ses fruits persistent tout l’hiver : les oiseaux en raffolent.",
+      "Sophora japonica": "Symbole de sagesse en Asie, souvent planté près des temples.",
+      "Cotinus coggygria": "Feuillage pourpre et inflorescences vaporeuses : l’« arbre à perruques ».",
+      "Betula pendula": "Tronc blanc et feuillage léger : la lumière danse au vent."
+    };
+
+    // === Phrases de fin rigolotes ===
+    const FUNNY = [
+      "Camille, tu es la reine de la chlorophylle ! 🌿👑",
+      "Camille, les plantes t’applaudissent avec leurs feuilles ! 👏🍃",
+      "Camille, tu pousses plus vite qu’un bambou bien arrosé ! 🎋",
+      "Camille, photosynthèse 100 % réussie, bravo ! ☀️",
+      "Camille, tu viens d’obtenir ton bac... botanique ! 🎓🌱",
+      "Camille, tu mérites une médaille en compost recyclable ! 🥇♻️",
+      "Camille, même Darwin aurait été impressionné ! 🧬🌺",
+      "Camille, tu es l’élève la plus chlorophyllienne de la saison ! 🍀",
+      "Camille, ton cerveau fleurit plus vite qu’un magnolia au printemps ! 🌸",
+      "Camille, les racines du savoir sont profondes… et tu les maîtrises à merveille ! 🌳"
+    ];
+
+    // === Messages d'encouragement variables ===
+    const MSG_LATIN_ONLY = [
+      "Bien joué Camille pour le latin ! Le nom commun reste à caler, tu y es presque.",
+      "Latin parfait, Camille ! Trouve le nom commun exact et c’est gagné.",
+      "Le latin, c’est validé, Camille. Le nom commun va suivre !"
+    ];
+    const MSG_COMMUN_ONLY = [
+      "Top pour le nom commun, Camille ! Maintenant, vise juste pour le latin.",
+      "Nom commun impeccable ! Le latin doit être exactement identique.",
+      "Encore un effort pour le latin, Camille, tu es à une feuille de la victoire."
+    ];
+    const MSG_BOTH_WRONG = [
+      "Courage Camille ! Respire, observe, et retente en respectant bien chaque caractère.",
+      "On arrose et on recommence, Camille ! Tu vas y arriver.",
+      "Pas grave, Camille : chaque erreur est du compost pour la prochaine réussite !"
+    ];
+
+    // === Utilitaires ===
+    const $ = s => document.querySelector(s);
+    const shuffle = a => a.map(v=>({v,r:Math.random()})).sort((x,y)=>x.r-y.r).map(o=>o.v);
+    const trim = s => (s||"").toString().trim();
+    const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+    function matchesExact(input, canonical){
+      const val = trim(input);
+      return canonical.split('|').some(opt => trim(opt) === val);
+    }
+
+    function show(el){ el.classList.remove('hidden'); }
+    function hide(el){ el.classList.add('hidden'); }
+    function showQuiz(){ $('#view-results').style.display='none'; $('#view-quiz').style.display='block'; }
+    function showResults(){ $('#view-quiz').style.display='none'; $('#view-results').style.display='block'; }
+
+    // === État ===
+    let score = 0, question = 0, bonusSeconds = 0;
+    let phase = 'round1'; // 'round1' -> 'review' -> 'done'
+    let deck = [];          // 12 plantes pour la session
+    let reviewDeck = [];    // celles ratées au premier essai
+    let current = null;
+    let firstAttemptPending = true; // pour savoir si on en est au 1er essai de la question
+
+    function startNewSession(){
+      score = 0; question = 0; bonusSeconds = 0; phase = 'round1';
+      const shuffled = shuffle([...PLANTES_MASTER]);
+      deck = shuffled.slice(0, 12); // 12 questions
+      reviewDeck = [];
+      $('#score').textContent = 'Score : 0';
+      $('#bonus').textContent = 'Bonus temps : 0 s';
+      $('#phase').textContent = 'Manche 1 / 2';
+      $('#progress').textContent = 'Question 1 / 12';
+      showQuiz();
+      loadNext();
+    }
+
+    function startReview(){
+      phase = 'review';
+      deck = shuffle([...reviewDeck]);
+      question = 0;
+      $('#phase').textContent = 'Manche 2 / 2 – Révisions des erreurs du 1er essai';
+      $('#progress').textContent = deck.length ? `Question 1 / ${deck.length}` : 'Aucune erreur à revoir 🎉';
+      loadNext();
+    }
+
+    function finish(){
+      phase = 'done';
+      // Résumé + liste des erreurs initiales
+      const totalQ = 12 + reviewDeck.length; // total posées (2e manche incluse)
+      const summary = `Score : ${score} / ${totalQ} — Temps bonus total : ${bonusSeconds} s.`;
+      $('#summary').textContent = pick(FUNNY) + \" \" + summary;
+      const list = $('#wrong-list');
+      list.innerHTML = '';
+      reviewDeck.forEach(p=>{
+        const li = document.createElement('li');
+        li.textContent = `${p.latin} — ${p.commun.split('|')[0]} (Famille : ${p.famille})`;
+        list.appendChild(li);
+      });
+      // Affiche la page de résultats avec audio + gif
+      showResults();
+      const audio = $('#applause');
+      if (audio) { try { audio.currentTime = 0; audio.play().catch(()=>{}); } catch(e){} }
+    }
+
+    function loadNext(){
+      hide($('#btn-next'));
+      $('#toast').textContent = '';
+      $('#anec').textContent = '';
+      $('#latin').value = '';
+      $('#commun').value = '';
+
+      if(deck.length === 0){
+        if(phase === 'round1'){
+          // lancer la manche de révision
+          startReview();
+          return;
+        } else if(phase === 'review'){
+          finish();
+          return;
+        }
+      }
+
+      current = deck.pop();
+      firstAttemptPending = true;
+      question++;
+      const total = (phase === 'round1') ? 12 : deck.length + question; // affiche en décroissant durant la review
+      $('#progress').textContent = `Question ${question} / ${phase==='round1'?12:(reviewDeck.length||1)}`;
+      $('#score').textContent = `Score : ${score}`;
+      $('#bonus').textContent = `Bonus temps : ${bonusSeconds} s`;
+      $('#photo').src = current.image || '';
+      $('#photo').alt = `Photo: ${current.latin}`;
+      $('#famille').textContent = `Famille : ${current.famille || '—'}`;
+      $('#caption').textContent = current.image ? `Observe : feuilles, écorce, floraison…` : `⚠️ Pas d'image définie pour ${current.latin}`;
+    }
+
+    function validate(){
+      const latinOk = matchesExact($('#latin').value, current.latin);
+      const communOk = matchesExact($('#commun').value, current.commun || '');
+
+      if(latinOk && communOk){
+        score++;
+        bonusSeconds += 10;
+        $('#score').textContent = `Score : ${score}`;
+        $('#bonus').textContent = `Bonus temps : ${bonusSeconds} s`;
+        const an = ANECDOTES[current.latin] || "Fun fact : cette espèce a bien plus d'histoires que de feuilles !";
+        $('#toast').textContent = `✔ Bravo Camille ! Réponse parfaite. (+10 s)`;
+        $('#toast').className = 'toast ok';
+        $('#anec').textContent = an;
+        show($('#btn-next'));
+      } else if(latinOk && !communOk){
+        $('#toast').textContent = pick(MSG_LATIN_ONLY);
+        $('#toast').className = 'toast mid';
+        if(firstAttemptPending){ reviewDeck.push(current); firstAttemptPending = false; }
+      } else if(!latinOk && communOk){
+        $('#toast').textContent = pick(MSG_COMMUN_ONLY);
+        $('#toast').className = 'toast mid';
+        if(firstAttemptPending){ reviewDeck.push(current); firstAttemptPending = false; }
+      } else {
+        $('#toast').textContent = pick(MSG_BOTH_WRONG);
+        $('#toast').className = 'toast no';
+        if(firstAttemptPending){ reviewDeck.push(current); firstAttemptPending = false; }
+      }
+    }
+
+    function reveal(){
+      $('#latin').value = current.latin;
+      const firstAlias = (current.commun||'').split('|')[0] || '';
+      $('#commun').value = firstAlias;
+      $('#toast').textContent = 'Réponse affichée. Recopie-la à l’identique, Camille (majuscules, accents et apostrophes compris).';
+      $('#toast').className = 'toast mid';
+      const an = ANECDOTES[current.latin];
+      if(an){ $('#anec').textContent = an; }
+      show($('#btn-next'));
+      if(firstAttemptPending){ reviewDeck.push(current); firstAttemptPending = false; }
+    }
+
+    function reset(){ startNewSession(); }
+
+    function refreshPreview(){
+      const sample = PLANTES_MASTER.map(p=>`• ${p.latin}  —  ${p.commun||'—'}  —  ${p.famille||'—'}  —  ${p.image||'images/...'}`).join('\n');
+      $('#data-preview').textContent = sample;
+    }
+
+    // === Listeners ===
+    $('#btn-validate').addEventListener('click', validate);
+    $('#btn-reveal').addEventListener('click', reveal);
+    $('#btn-reset').addEventListener('click', reset);
+    $('#btn-skip').addEventListener('click', loadNext);
+    $('#btn-next').addEventListener('click', loadNext);
+    $('#latin').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#commun').focus(); }});
+    $('#commun').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); validate(); }});
+    $('#btn-replay').addEventListener('click', startNewSession);
+    $('#btn-back').addEventListener('click', ()=>{ showQuiz(); });
+
+    // === Init ===
+    refreshPreview();
+    startNewSession();
+  </script>
+</body>
+</html>

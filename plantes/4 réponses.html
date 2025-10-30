@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz Plantes – Reconnaissance</title>
+  <style>
+    :root {
+      --bg: #0f172a; /* slate-900 */
+      --card: #111827cc; /* near black w/ alpha */
+      --text: #e5e7eb; /* gray-200 */
+      --muted: #9ca3af; /* gray-400 */
+      --accent: #22c55e; /* green-500 */
+      --accent2: #3b82f6; /* blue-500 */
+      --danger: #ef4444; /* red-500 */
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: radial-gradient(1200px 800px at 10% -20%, #1f2937, #0f172a); color: var(--text); }
+    .container { max-width: 960px; margin: 24px auto; padding: 16px; }
+    .card { background: var(--card); backdrop-filter: blur(6px); border: 1px solid #1f2937; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    h1 { font-size: 20px; margin: 0; letter-spacing: 0.2px; color: #f3f4f6; }
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    button { cursor: pointer; border: 1px solid #334155; background: #0b1220; color: var(--text); padding: 10px 14px; border-radius: 12px; font-weight: 600; transition: transform .05s ease, border-color .2s, background .2s; }
+    button:hover { border-color: #475569; }
+    button:active { transform: translateY(1px); }
+    .btn-primary { background: linear-gradient(135deg, #0b1220, #12233f); border-color: #3b82f633; }
+    .btn-accent { background: linear-gradient(135deg, #0b1220, #0f2a1a); border-color: #22c55e55; }
+    .btn-danger { background: linear-gradient(135deg, #0b1220, #340e11); border-color: #ef444455; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 780px) { .grid { grid-template-columns: 1.2fr 1fr; } }
+
+    .image-wrap { position: relative; border-radius: 16px; overflow: hidden; background: #0b1220; border: 1px solid #1f2937; min-height: 320px; display: flex; align-items: center; justify-content: center; }
+    .image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .image-caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, transparent, rgba(0,0,0,0.7)); padding: 12px 14px; font-size: 13px; color: #d1d5db; }
+
+    .answers { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 560px) { .answers { grid-template-columns: 1fr 1fr; } }
+    .answers button { text-align: left; }
+
+    .pill { font-size: 12px; color: var(--muted); background: #0b1220; border: 1px solid #1f2937; padding: 6px 10px; border-radius: 999px; }
+
+    .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
+    .status b { color: #f3f4f6; }
+
+    .toast { margin-top: 8px; font-weight: 600; }
+    .toast.ok { color: var(--accent); }
+    .toast.no { color: var(--danger); }
+    .muted { color: var(--muted); font-size: 12px; }
+
+    footer { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header>
+        <h1>Quiz – Reconnaissance des végétaux</h1>
+        <div class="controls">
+          <span class="pill" id="progress">Question 1 / 10</span>
+          <span class="pill" id="score">Score : 0</span>
+          <button class="btn-primary" id="btn-skip" title="Passe à une autre plante">Suivant ↷</button>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div class="image-wrap">
+          <img id="photo" alt="Photo de la plante" />
+          <div class="image-caption" id="caption">Astuce : concentre-toi sur la feuille, l'écorce, la floraison…</div>
+        </div>
+
+        <div>
+          <div class="status"><span id="famille" class="pill">Famille : —</span><span id="nom-commun" class="pill">Nom commun : —</span></div>
+          <div class="answers" id="answers"></div>
+          <div class="toast" id="toast"></div>
+          <footer>
+            <small class="muted">Ajoute tes images dans le dossier <b>images/</b> et complète la liste ci-dessous.</small>
+            <div>
+              <button id="btn-reveal" class="btn-accent" title="Afficher la réponse">Afficher la réponse</button>
+              <button id="btn-reset" class="btn-danger" title="Remettre le score à zéro">Réinitialiser</button>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <details class="card" style="margin-top:12px;">
+      <summary><b>⚙️ Paramètres & données</b> — clique pour voir / modifier</summary>
+      <p class="muted">Tu peux éditer ci-dessous la liste des plantes. <b>latin</b> = réponse attendue. <b>image</b> = chemin vers l'image (ex: <code>images/acer_palmatum.jpg</code>). <b>commun</b> et <b>famille</b> sont facultatifs (affichés en indice).</p>
+      <pre id="data-preview" style="white-space:pre-wrap;background:#0b1220;border:1px solid #1f2937;padding:10px;border-radius:12px;overflow:auto;max-height:260px;"></pre>
+    </details>
+  </div>
+
+  <script>
+    // --- Données d'exemple (à compléter avec tes propres images) ---
+    // Conseils : place tes photos dans /images et mets ici le nom du fichier.
+    const PLANTES = [
+      { latin: "Carpinus betulus", commun: "Charme commun", famille: "Betulaceae", image: "images/carpinus_betulus.jpg" },
+      { latin: "Acer palmatum", commun: "Érable du Japon", famille: "Aceraceae", image: "images/acer_palmatum.jpg" },
+      { latin: "Acer platanoides", commun: "Érable plane", famille: "Aceraceae", image: "images/acer_platanoides.jpg" },
+      { latin: "Quercus robur", commun: "Chêne pédonculé", famille: "Fagaceae", image: "images/quercus_robur.jpg" },
+      { latin: "Quercus rubra", commun: "Chêne rouge d’Amérique", famille: "Fagaceae", image: "images/quercus_rubra.jpg" },
+      { latin: "Liquidambar styraciflua", commun: "Copalme d’Amérique", famille: "Altingiaceae", image: "images/liquidambar_styraciflua.jpg" },
+      { latin: "Ginkgo biloba", commun: "Ginkgo", famille: "Ginkgoaceae", image: "images/ginkgo_biloba.jpg" },
+      { latin: "Cornus sanguinea", commun: "Cornouiller sanguin", famille: "Cornaceae", image: "images/cornus_sanguinea.jpg" },
+      { latin: "Hamamelis mollis", commun: "Hamamélis de Chine", famille: "Hamamelidaceae", image: "images/hamamelis_mollis.jpg" },
+      { latin: "Magnolia x soulangeana", commun: "Magnolia de Soulange", famille: "Magnoliaceae", image: "images/magnolia_soulangeana.jpg" },
+      { latin: "Acer griseum", commun: "Érable à écorce de papier", famille: "Aceraceae", image: "images/acer_griseum.jpg" },
+      { latin: "Koelreuteria paniculata", commun: "Savonnier", famille: "Sapindaceae", image: "images/koelreuteria_paniculata.jpg" }
+    ];
+
+    // --- Utilitaires ---
+    const $ = sel => document.querySelector(sel);
+    const shuffle = arr => arr.map(v => ({ v, r: Math.random() }))
+                              .sort((a,b)=>a.r-b.r)
+                              .map(({v})=>v);
+
+    // --- État ---
+    let score = 0;
+    let questionIndex = 0;
+    let order = shuffle([...PLANTES]);
+
+    function nextQuestion() {
+      if (order.length === 0) order = shuffle([...PLANTES]);
+      const plante = order.pop();
+      questionIndex++;
+
+      // MAJ UI de base
+      $('#progress').textContent = `Question ${questionIndex}`;
+      $('#score').textContent = `Score : ${score}`;
+      $('#photo').src = plante.image || '';
+      $('#photo').alt = `Photo: ${plante.latin}`;
+      $('#famille').textContent = `Famille : ${plante.famille || '—'}`;
+      $('#nom-commun').textContent = `Nom commun : ${plante.commun || '—'}`;
+      $('#caption').textContent = plante.image ? `Observe : feuilles, écorce, floraison…` : `⚠️ Pas d'image définie pour ${plante.latin}. Ajoute un fichier dans /images`;
+
+      // Construire 4 propositions (1 correcte + 3 distrac.)
+      const autres = shuffle(PLANTES.filter(p => p.latin !== plante.latin));
+      const propositions = shuffle([plante.latin, ...autres.slice(0,3).map(p=>p.latin)]);
+
+      // Afficher
+      const answers = $('#answers');
+      answers.innerHTML = '';
+      propositions.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.addEventListener('click', () => pick(choice, plante.latin));
+        answers.appendChild(btn);
+      });
+
+      // stocker la bonne réponse pour le bouton "révéler"
+      answers.dataset.correct = plante.latin;
+    }
+
+    function pick(choice, correct) {
+      const toast = $('#toast');
+      if (choice === correct) {
+        score++;
+        $('#score').textContent = `Score : ${score}`;
+        toast.textContent = '✔ Bonne réponse !';
+        toast.className = 'toast ok';
+        setTimeout(()=> nextQuestion(), 700);
+      } else {
+        toast.textContent = `✖ Mauvaise réponse. La bonne réponse était : ${correct}`;
+        toast.className = 'toast no';
+      }
+    }
+
+    function reveal() {
+      const correct = $('#answers').dataset.correct;
+      if (!correct) return;
+      const toast = $('#toast');
+      toast.textContent = `Réponse : ${correct}`;
+      toast.className = 'toast ok';
+    }
+
+    function reset() {
+      score = 0; questionIndex = 0; order = shuffle([...PLANTES]);
+      $('#toast').textContent = '';
+      $('#score').textContent = 'Score : 0';
+      nextQuestion();
+    }
+
+    // Aperçu des données
+    function refreshPreview(){
+      const sample = PLANTES.map(p=>`• ${p.latin}  —  ${p.commun||'—'}  —  ${p.famille||'—'}  —  ${p.image||'images/...'}`).join('\n');
+      $('#data-preview').textContent = sample;
+    }
+
+    // Listeners
+    $('#btn-skip').addEventListener('click', nextQuestion);
+    $('#btn-reveal').addEventListener('click', reveal);
+    $('#btn-reset').addEventListener('click', reset);
+
+    // Init
+    refreshPreview();
+    nextQuestion();
+  </script>
+</body>
+</html>
